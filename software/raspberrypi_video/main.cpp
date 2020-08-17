@@ -10,7 +10,9 @@
 #include <QPushButton>
 
 #include "LeptonThread.h"
+#include "OutlineLabel.h"
 #include "MyLabel.h"
+
 
 void printUsage(char *cmd) {
         char *cmdname = basename(cmd);
@@ -135,6 +137,11 @@ int main( int argc, char **argv )
 	if (0 <= rangeMin) thread->useRangeMinValue(rangeMin);
 	if (0 <= rangeMax) thread->useRangeMaxValue(rangeMax);
 	QObject::connect(thread, SIGNAL(updateImage(QImage)), &myLabel, SLOT(setImage(QImage)));
+
+	//Label for radiometric data
+	OutlineLabel * radData = new OutlineLabel(myWidget);
+	radData->setGeometry(320/2 - 15,290/2 - 5, 60, 20);
+	QObject::connect(thread, SIGNAL(updateRadiometry(QString)), radData, SLOT(setText(QString)));
 	
 	//connect ffc button to the thread's ffc action
 	QObject::connect(button1, SIGNAL(clicked()), thread, SLOT(performFFC()));

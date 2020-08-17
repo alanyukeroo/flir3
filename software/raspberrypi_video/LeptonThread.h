@@ -1,6 +1,7 @@
 #ifndef TEXTTHREAD
 #define TEXTTHREAD
 
+#include <sstream>
 #include <ctime>
 #include <stdint.h>
 
@@ -14,6 +15,9 @@
 #define PACKETS_PER_FRAME 60
 #define FRAME_SIZE_UINT16 (PACKET_SIZE_UINT16*PACKETS_PER_FRAME)
 
+#define WIDTH 80
+#define HEIGHT 60
+
 class LeptonThread : public QThread
 {
   Q_OBJECT;
@@ -21,6 +25,7 @@ class LeptonThread : public QThread
 public:
   LeptonThread();
   ~LeptonThread();
+  uint16_t data_radiometry[WIDTH][HEIGHT];
 
   void setLogLevel(uint16_t);
   void useColormap(int);
@@ -37,6 +42,7 @@ public slots:
 signals:
   void updateText(QString);
   void updateImage(QImage);
+  void updateRadiometry(QString);
 
 private:
 
@@ -58,6 +64,7 @@ private:
   uint8_t result[PACKET_SIZE*PACKETS_PER_FRAME];
   uint8_t shelf[4][PACKET_SIZE*PACKETS_PER_FRAME];
   uint16_t *frameBuffer;
+  uint16_t valueFrameBuffer;
 
 };
 

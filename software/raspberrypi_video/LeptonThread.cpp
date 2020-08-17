@@ -12,6 +12,9 @@
 #define FRAME_SIZE_UINT16 (PACKET_SIZE_UINT16*PACKETS_PER_FRAME)
 #define FPS 27;
 
+#define WIDTH 80
+#define HEIGHT 60
+
 LeptonThread::LeptonThread() : QThread()
 {
 	//
@@ -117,6 +120,9 @@ void LeptonThread::run()
 	float scale = 255/diff;
 	uint16_t n_wrong_segment = 0;
 	uint16_t n_zero_value_drop_frame = 0;
+	uint16_t value;
+	int row, column;
+
 
 	//open spi port
 	SpiOpenPort(0, spiSpeed);
@@ -219,9 +225,13 @@ void LeptonThread::run()
 			scale = 255/diff;
 		}
 
-		int row, column;
+	
 		uint16_t value;
 		uint16_t valueFrameBuffer;
+
+
+
+
 		QRgb color;
 		for(int iSegment = iSegmentStart; iSegment <= iSegmentStop; iSegment++) {
 			int ofsRow = 30 * (iSegment - 1);
@@ -257,12 +267,33 @@ void LeptonThread::run()
 					row = i / PACKET_SIZE_UINT16;
 				}
 				myImage.setPixel(column, row, color);
+
 			}
 		}
+//Find radiometric data from spot meter in 3x3 pixel box around the center of the image
+		float radValue = 0;
+		for(int i=0;i<3;i++){
+			for(int j=0;j<3;j++){
+				radValue +=  data_radiometry[(WIDTH/2) + i][(HEIGHT/2) + i];
+			}
+		}
+		radValue = radValue / 9;
+		//Radiometry values are the temperature in Kelvin * 100.
+		float tempK = radValue/100;
+		float tempC = tempK - 273.15;
+		//float tempF = tempC * 1.8 + 32;
+		
+		QString s;
+		s.sprintf("%.2f C", tempC);
+		std::cout<<tempC<<endl;
 
-		if (n_zero_value_drop_frame != 0) {
+		/* if (n_zero_value_drop_frame != 0) {
 			log_message(8, "[WARNING] Found zero-value. Drop the frame continuously " + std::to_string(n_zero_value_drop_frame) + " times [RECOVERED]");
-			n_zero_value_drop_frame = 0;
+			n_zero_value_drop_frame = 0; */
+		//Draw crosshairs in the middle of the image
+		for(int j = 0; j < 5; j++){
+			myImage.setPixel(WIDTH/2-1, HEIGHT/2-3+j, 0);
+			myImage.setPixel(WIDTH/2-3+j, HEIGHT/2-1, 0);
 		}
 
 		//lets emit the signal for update

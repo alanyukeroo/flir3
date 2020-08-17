@@ -5,6 +5,8 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = raspberrypi_video
 
+QMAKE_CXXFLAGS += -std=c++11
+
 RPI_LIBS = ../raspberrypi_libs
 LEPTONSDK = leptonSDKEmb32PUB
 
